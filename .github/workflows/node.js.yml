@@ -16,4 +16,4 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - run: yarn deploy
+    - run: GIT_USER=Fellow-Flow USE_SSH=true yarn deploy
