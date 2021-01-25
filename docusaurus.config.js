@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  title: 'My Site',
+  title: 'Fellow-Flow',
   tagline: 'The tagline of my site',
   url: 'https://fellow-flow.github.io',
   baseUrl: '/',
