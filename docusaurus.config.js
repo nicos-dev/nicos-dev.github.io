@@ -8,15 +8,15 @@
  */
 
 module.exports = {
-  title: 'My Site',
+  title: 'Fellow Flow Docs',
   tagline: 'The tagline of my site',
   url: 'https://fellow-flow.github.io',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-  organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'Fellow-Flow', // Usually your GitHub org/user name.
+  projectName: 'fellow-flow.github.io', // Usually your repo name.
   themeConfig: {
     navbar: {
       title: 'My Facebook Project',
