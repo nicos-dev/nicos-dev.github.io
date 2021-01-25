@@ -9,7 +9,7 @@
 
 module.exports = {
   title: 'Fellow-Flow',
-  tagline: 'The tagline of my site',
+  tagline: 'Knowledge Platform',
   url: 'https://fellow-flow.github.io',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -19,10 +19,10 @@ module.exports = {
   projectName: 'fellow-flow.github.io', // Usually your repo name.
   themeConfig: {
     navbar: {
-      title: 'My Facebook Project',
+      title: 'Fellow-Flow',
       logo: {
-        alt: 'My Facebook Project Logo',
-        src: 'img/logo.svg',
+        alt: 'Fellow-Flow Logo',
+        src: 'img/fellow-flow_logo.png',
       },
       items: [
         {
