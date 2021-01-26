@@ -11,7 +11,7 @@ module.exports = {
   someSidebar: {
     "Spring Keycloak Starter": [],
     "Spring Boot Angular Demo": [],
-    "Address Finder": []
+    "Address Finder": [],
     Features: ['mdx'],
   },
 };
