@@ -9,7 +9,9 @@
 
 module.exports = {
   someSidebar: {
-    Docusaurus: ['doc1', 'doc2', 'doc3'],
+    "Spring Keycloak Starter": [],
+    "Spring Boot Angular Demo": [],
+    "Address Finder": []
     Features: ['mdx'],
   },
 };

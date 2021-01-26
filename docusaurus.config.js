@@ -28,13 +28,18 @@ module.exports = {
         {
           to: 'docs/',
           activeBasePath: 'docs',
-          label: 'Docs',
+          label: 'About',
           position: 'left',
         },
-        {to: 'blog', label: 'Blog', position: 'left'},
+        {
+          to: 'docs/',
+          activeBasePath: 'docs',
+          label: 'Projects',
+          position: 'left',
+        },
         // Please keep GitHub link to the right for consistency.
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/nicos-dev',
           label: 'GitHub',
           position: 'right',
         },
