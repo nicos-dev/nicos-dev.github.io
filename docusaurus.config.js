@@ -8,21 +8,21 @@
  */
 
 module.exports = {
-  title: 'Fellow-Flow',
-  tagline: 'Knowledge Platform',
-  url: 'https://fellow-flow.github.io',
+  title: 'Nicos-Dev',
+  tagline: 'Welcome!',
+  url: 'https://nicos-dev.github.io',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-  organizationName: 'Fellow-Flow', // Usually your GitHub org/user name.
-  projectName: 'fellow-flow.github.io', // Usually your repo name.
+  organizationName: 'nicos-dev', // Usually your GitHub org/user name.
+  projectName: 'nicos-dev.github.io', // Usually your repo name.
   themeConfig: {
     navbar: {
-      title: 'Fellow-Flow',
+      title: 'Nicos-Dev',
       logo: {
         alt: 'Fellow-Flow Logo',
-        src: 'img/fellow-flow_logo.png',
+        src: 'img/nicos-dev_logo.png',
       },
       items: [
         {
