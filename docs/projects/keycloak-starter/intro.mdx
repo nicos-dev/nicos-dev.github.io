@@ -1,0 +1,144 @@
+---
+id: intro
+title: Indroduction
+---
+
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-orange.svg)](https://sonarcloud.io/dashboard?id=nicos-dev_spring-keycloak-starter)
+
+<br/>
+
+![Gradle Package](https://github.com/nicos-dev/spring-keycloak-starter/workflows/Gradle%20Package/badge.svg)
+
+Spring-Keycloak-Starter is a maven dependency for easy keycloak integration &amp; endpoint security
+
+<br/>
+
+## Integration
+
+<br/>
+
+### 1. Add dependency
+
+<br/>
+
+#### Gradle - Kotlin
+
+```kotlin
+// build.gradle.kts
+
+repositories {
+	maven {
+		name = "github"
+		url = uri("https://maven.pkg.github.com/nicos-dev/spring-keycloak-starter")
+		credentials {
+			username = (project.properties["githubUser"] ?: System.getenv("GITHUB_USER")).toString()
+			password = (project.properties["githubPassword"] ?: System.getenv("GITHUB_TOKEN")).toString()
+		}
+	}
+}
+
+dependencies {
+	implementation("com.nicos-dev:spring-keycloak-starter:<version>")
+}
+```
+
+<br/>
+
+### 2. Configure
+
+```yaml
+# application.yml
+
+keycloak-starter:
+
+  # Anonymous -> Without authorization
+
+  # Endpoint Security
+  matchers:
+    -
+      # Endpoint path - supports wildcards (*, **)
+      path: /endpoint/path/
+
+      # Methods which are permitted on path
+      methods:
+        - GET
+        - PUT
+        - POST
+        - DELETE
+        - TRACE
+        - PATCH
+        - OPTIONS
+        - HEAD
+
+      # Keycloak roles of client (optional if set to public)
+      requiredRoles:
+        - your-client-role
+
+      # Anonymous access allowed
+      public: "true/false"
+
+      # CORS (Cross-Origin) configuration for path - optional
+      cors:
+
+        # Create CORS entry or not - defaults to true
+        autoGenerate: "true/false"
+
+        # Defaults to wildcard
+        allowedOrigins:
+          - "*"
+
+        # Defaults to true
+        allowCredentials: "true/false"
+
+        # Defaults to below
+        allowedHeaders:
+          - Authorization
+          - Cache-Control
+          - Content-Type
+
+
+  # OAuth2 Configuration
+  oauth:
+
+    # Url where token was requested (issued) - iss claim
+    issuers:
+      - http://<kc-host>:<port>/auth/realms/<realm>
+
+    # Keycloak realm
+    realm: <realm>
+
+    # Keycloak client
+    clientId: <client>
+
+    keycloakAuthUrl: http://<kc-host>:<port>/auth
+
+  # Disables all security settings - unauthorized access to all endpoints
+  devMode: "true/false"
+
+  # Paths where anonymous access is granted
+  whitelist:
+    - /path/without/auth/**
+
+  disableCSRF: "true/false"
+
+  disableFrameOptions: "true/false"
+
+  # Defaults to if_required
+  sessionCreationPolicy: "always | stateless | never | if_required"
+
+
+```
+
+
+You can write JSX and use React components within your Markdown thanks to [MDX](https://mdxjs.com/).
+
+export const Highlight = ({children, color}) => ( <span style={{
+      backgroundColor: color,
+      borderRadius: '2px',
+      color: '#fff',
+      padding: '0.2rem',
+    }}>{children}</span> );
+
+<Highlight color="#25c2a0">Docusaurus green</Highlight> and <Highlight color="#1877F2">Facebook blue</Highlight> are my favorite colors.
+
+I can write **Markdown** alongside my _JSX_!

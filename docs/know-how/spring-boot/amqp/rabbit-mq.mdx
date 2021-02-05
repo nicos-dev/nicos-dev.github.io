@@ -1,0 +1,589 @@
+---
+id: rabbit-mq
+title: RabbitMQ
+---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import TOCInline from '@theme/TOCInline';
+
+export const Highlight = ({children, color}) => (
+    <span
+        style={{
+            backgroundColor: color,
+            borderRadius: '2px',
+            color: '#fff',
+            padding: '0.2rem',
+        }}>
+    {children}
+  </span>
+);
+
+<TOCInline toc={toc} />
+
+<br/>
+
+## Requirements
+
+<br/>
+
+- Docker
+  - DockerHub Access
+- [2 Spring Projects](https://start.spring.io/)
+  - Project Gradle
+  - Language Kotlin
+  - Spring-Boot Default
+  - Packaging Jar
+  - Java e.g. 11
+
+## Presets
+
+<br/>
+
+### RabbitMQ Docker-Container
+
+<br/>
+
+#### 1. Save compose to any directory.
+
+```yaml
+# docker-compose.yaml
+version: '3.7'
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+```
+
+<br/>
+
+#### 2. Start compose
+
+```bash
+cd /path/to/your/compose
+docker-compose up -d
+```
+
+<br/>
+
+#### 3. Verify container up
+
+Open Docker-Dashboard (Taskbar > Right > Docker-Icon > Right-Click > Dashboard)
+
+**OR**
+
+Open [RabbitMQ UI](http://docker-machine:15672/)
+
+:::info You can always check if your messages delivered correctly via RabbitMQ UI
+:::
+
+<br/>
+
+### Project Configuration
+
+#### 1. Add Gradle dependency
+```kts
+// build.gradle.kts
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-amqp")
+    // (...)
+}
+```
+
+<br/>
+
+#### 2. Setup Connection
+```yaml
+# application.yml
+spring:
+  rabbitmq:
+    port: 5672
+    host: docker-machine
+```
+
+<br/>
+
+#### 2. Create config
+
+<Tabs
+    defaultValue="cache-service"
+    values={[
+        {label: 'User Service', value: 'user-service'},
+        {label: 'Cache Service', value: 'cache-service'},
+    ]}>
+    <TabItem value="user-service">
+
+        ```kotlin
+        import com.fasterxml.jackson.databind.ObjectMapper
+        import org.springframework.amqp.core.DirectExchange
+        import org.springframework.amqp.core.Queue
+        import org.springframework.amqp.core.TopicExchange
+        import org.springframework.amqp.rabbit.connection.ConnectionFactory
+        import org.springframework.amqp.rabbit.core.RabbitTemplate
+        import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer
+        import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter
+        import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
+        import org.springframework.amqp.support.converter.SimpleMessageConverter
+        import org.springframework.beans.factory.annotation.Autowired
+        import org.springframework.beans.factory.annotation.Value
+        import org.springframework.context.annotation.Bean
+        import org.springframework.context.annotation.Configuration
+
+        /**
+        * @author Nicholas Dietz 
+        **/
+        @Configuration
+        class RabbitMqConfig {
+
+        // Autowire your global jackson object-mapper or use default
+        @Autowired
+        private lateinit var objectMapper: ObjectMapper
+
+        // Use this in rabbitMqTemplate(..) to directly deserialize class from message
+        @Bean
+        fun jsonMessageConverter(): Jackson2JsonMessageConverter {
+        return Jackson2JsonMessageConverter(objectMapper)
+    }
+
+
+        @Bean
+        fun rabbitMqTemplate(connectionFactory: ConnectionFactory, jsonMessageConverter: Jackson2JsonMessageConverter): RabbitTemplate {
+        return RabbitTemplate(connectionFactory).apply {
+        messageConverter = jsonMessageConverter()
+    }
+    }
+
+    }
+        ```
+
+    </TabItem>
+    <TabItem value="cache-service">
+
+        ```kotlin
+
+        import com.fasterxml.jackson.databind.ObjectMapper
+        import org.springframework.amqp.core.DirectExchange
+        import org.springframework.amqp.core.Queue
+        import org.springframework.amqp.core.TopicExchange
+        import org.springframework.amqp.rabbit.connection.ConnectionFactory
+        import org.springframework.amqp.rabbit.core.RabbitTemplate
+        import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer
+        import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter
+        import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
+        import org.springframework.amqp.support.converter.SimpleMessageConverter
+        import org.springframework.beans.factory.annotation.Autowired
+        import org.springframework.beans.factory.annotation.Value
+        import org.springframework.context.annotation.Bean
+        import org.springframework.context.annotation.Configuration
+
+        /**
+        * @author Nicholas Dietz 
+        **/
+        @Configuration
+        class RabbitMqConfig {
+
+        // Autowire your global jackson object-mapper or use default
+        @Autowired
+        private lateinit var objectMapper: ObjectMapper
+
+        // Use this one if you get generic message data
+        @Bean
+        fun simpleConverter(): SimpleMessageConverter {
+        return SimpleMessageConverter()
+    }
+
+
+        @Bean
+        fun rabbitMqTemplate(connectionFactory: ConnectionFactory, jsonMessageConverter: Jackson2JsonMessageConverter): RabbitTemplate {
+        return RabbitTemplate(connectionFactory).apply {
+        messageConverter = simpleConverter()
+    }
+    }
+
+    }
+        ```
+
+    </TabItem>
+</Tabs>
+
+<br/>
+
+## Concept
+
+You have to connect 2 services with each other via Exchange **usu.user-exchange**. There'll be 2 Queues **usu.user-service** and **usu.cache-service**
+The use-case is that you must synchronize data (users) from **User Service** to **Cache Service**
+
+<br/>
+
+### Legend
+<Highlight color="#4287f5">Service</Highlight> - <Highlight color="#f5c842">Queue</Highlight> - <Highlight color="#f54260">Exchange</Highlight> - <Highlight color="#11d1ce">Routing-Key</Highlight><br/>
+
+<br/>
+
+### Message Data (User)
+
+<Tabs
+    defaultValue="json"
+    values={[
+        {label: 'JSON User', value: 'json'},
+        {label: 'User & Cache Service UserDTO', value: 'kotlin-class'},
+    ]}>
+    <TabItem value="json">
+
+        This is the default JSON-Format our **User Object**:
+
+        ```json
+        {
+            "id": "String",
+            "firstName": "String",
+            "lastName": "String",
+            "email": "String"
+        }
+        ```
+
+    </TabItem>
+    <TabItem value="kotlin-class">
+
+        For serialization & deserialization we need a this UserDTO class. So we can create this object from JSON and vice versa.
+
+        ```kotlin
+        import com.fasterxml.jackson.annotation.JsonProperty
+        import lombok.AllArgsConstructor
+        import lombok.Data
+        import lombok.NoArgsConstructor
+        import java.io.Serializable
+
+        /**
+        * @author Nicholas Dietz 
+        **/
+        @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        class UserDto : Serializable {
+
+        @JsonProperty("id")
+        var id: String? = null
+
+        @JsonProperty("firstName")
+        var firstName: String? = null
+
+        @JsonProperty("lastName")
+        var lastName: String? = null
+
+        @JsonProperty("email")
+        var email: String? = null
+
+    }
+        ```
+
+    </TabItem>
+</Tabs>
+
+
+<br/>
+
+
+<br/>
+
+### Events
+
+:::info Event names are Routing-Keys
+:::
+
+<br/>
+
+#### Event - usu.user.sync-request
+
+<Tabs
+    defaultValue="flow"
+    values={[
+        {label: 'Flow', value: 'flow'},
+        {label: 'Message Payload', value: 'payload'}
+    ]}>
+    <TabItem value="flow">
+
+        <Highlight color="#4287f5">Cache Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.sync-request</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+
+    </TabItem>
+    <TabItem value="payload">
+
+        **No data**
+
+    </TabItem>
+</Tabs>
+
+<br/>
+
+#### Event - usu.user.sync-response
+
+<Tabs
+    defaultValue="flow"
+    values={[
+        {label: 'Flow', value: 'flow'},
+        {label: 'Message Payload', value: 'payload'}
+    ]}>
+    <TabItem value="flow">
+
+        <Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.sync-response</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+
+    </TabItem>
+    <TabItem value="payload">
+
+        Message contains a list of **all users**.
+
+        ```json
+        [
+        {
+            "id": "String",
+            "firstName": "String",
+            "lastName": "String",
+            "email": "String"
+        }
+        ]
+        ```
+
+    </TabItem>
+</Tabs>
+
+<br/>
+
+#### Event - usu.user.created
+
+<Tabs
+    defaultValue="flow"
+    values={[
+        {label: 'Flow', value: 'flow'},
+        {label: 'Message Payload', value: 'payload'}
+    ]}>
+    <TabItem value="flow">
+
+        <Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.created</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+
+    </TabItem>
+    <TabItem value="payload">
+
+        Message contains a the created user.
+
+        ```json
+        {
+            "id": "String",
+            "firstName": "String",
+            "lastName": "String",
+            "email": "String"
+        }
+        ```
+
+    </TabItem>
+</Tabs>
+
+<br/>
+
+#### Event - usu.user.deleted
+
+<Tabs
+    defaultValue="flow"
+    values={[
+        {label: 'Flow', value: 'flow'},
+        {label: 'Message Payload', value: 'payload'}
+    ]}>
+    <TabItem value="flow">
+
+        <Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.deleted</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+
+    </TabItem>
+    <TabItem value="payload">
+
+        Message contains a the ID of the deleted user.
+
+        ```json
+        {
+            "id": "String"
+        }
+        ```
+
+    </TabItem>
+</Tabs>
+
+<br/>
+
+#### Event - usu.data.updated
+
+<Tabs
+    defaultValue="flow"
+    values={[
+        {label: 'Flow', value: 'flow'},
+        {label: 'Message Payload', value: 'payload'}
+    ]}>
+    <TabItem value="flow">
+
+        <Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.updated</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+
+    </TabItem>
+    <TabItem value="payload">
+
+        Message contains a the updated user.
+
+        ```json
+        {
+            "id": "String",
+            "firstName": "String",
+            "lastName": "String",
+            "email": "String"
+        }
+        ```
+
+    </TabItem>
+</Tabs>
+
+<br/>
+
+### Sender
+Messages are send to a Exchange with a specific Routing-Key, but **without** defining a specific Queue.
+
+<Tabs
+    defaultValue="cache-service"
+    values={[
+        {label: 'User Service', value: 'user-service'},
+        {label: 'Cache Service', value: 'cache-service'}
+    ]}>
+    <TabItem value="user-service">
+
+
+
+    </TabItem>
+    <TabItem value="cache-service">
+
+        ```kotlin
+        import com.usu.usermanagement.config.amqp.RabbitMqConfig
+        import org.slf4j.LoggerFactory
+        import org.springframework.amqp.core.Message
+        import org.springframework.amqp.core.MessageProperties
+        import org.springframework.amqp.rabbit.core.RabbitTemplate
+        import org.springframework.beans.factory.annotation.Autowired
+        import org.springframework.stereotype.Service
+
+        /**
+        * @author Nicholas Dietz 
+        **/
+        @Service
+        class UserRabbitMqSenderServiceImp: UserRabbitMqSenderService {
+
+        @Autowired
+        private lateinit var rabbitMqTemplate: RabbitTemplate
+
+        override fun requestUsers() {
+        rabbitMqTemplate.send(
+        "usu.user-exchange", // Exchange
+        "usu.user.sync-request", // Routing Key
+        Message("".toByteArray(), MessageProperties()) // Empty message
+        )
+    }
+
+    }
+        ```
+
+    </TabItem>
+</Tabs>
+
+<br/>
+
+### Receiver
+
+To receive any messages you have to declare bindings. Because Messages are send to <Highlight color="#f54260">usu.user-exchange</Highlight>
+you must define which <Highlight color="#11d1ce">Routing-Keys</Highlight> should be forwarded to your <Highlight color="#f5c842">Queue</Highlight> in order to receive any messages.
+
+<Tabs
+    defaultValue="cache-service"
+    values={[
+        {label: 'User Service', value: 'user-service'},
+        {label: 'Cache Service', value: 'cache-service'}
+    ]}>
+    <TabItem value="user-service">
+
+
+
+    </TabItem>
+    <TabItem value="cache-service">
+
+        ```kotlin
+        import com.fasterxml.jackson.databind.ObjectMapper
+        import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
+        import org.slf4j.LoggerFactory
+        import org.springframework.amqp.core.ExchangeTypes
+        import org.springframework.amqp.core.Message
+        import org.springframework.amqp.rabbit.annotation.Exchange
+        import org.springframework.amqp.rabbit.annotation.Queue
+        import org.springframework.amqp.rabbit.annotation.QueueBinding
+        import org.springframework.amqp.rabbit.annotation.RabbitListener
+        import org.springframework.amqp.support.AmqpHeaders
+        import org.springframework.beans.factory.annotation.Autowired
+        import org.springframework.messaging.handler.annotation.Header
+        import org.springframework.messaging.handler.annotation.Payload
+        import org.springframework.stereotype.Service
+
+        /**
+        * @author Nicholas Dietz 
+        **/
+        @Service
+        class UserRabbitMqReceiver {
+
+        @Autowired
+        private lateinit var themeRepository: ThemeRepository
+
+        @Autowired
+        private lateinit var objectMapper: ObjectMapper
+
+        @RabbitListener(
+        bindings = [
+        QueueBinding(
+        value = Queue(value = "usu.cache-service", durable = "true"),
+        exchange = Exchange(value = "usu.user-exchange", type = ExchangeTypes.TOPIC),
+        key = [
+        "usu.user.sync-response",
+        "usu.user.created",
+        "usu.user.updated",
+        "usu.user.deleted"
+        ]
+        )
+        ]
+        )
+        fun messageArrived(@Payload value: String, @Header(AmqpHeaders.RECEIVED_ROUTING_KEY) key: String) {
+        when (key) {
+        "usu.user.sync-response" -> syncUsers(value)
+        "usu.user.created" -> userCreated(value)
+        "usu.user.updated" -> userUpdated(value)
+        "usu.user.deleted" -> userDeleted(value)
+    }
+    }
+
+        fun userCreated(value: String) {
+        val user = objectMapper.readValue(value, UserDto::class.java)
+        TODO("Do something")
+    }
+
+        fun userUpdated(value: String) {
+        val user = objectMapper.readValue(value, UserDto::class.java)
+        TODO("Do something")
+    }
+
+        fun userDeleted(value: String) {
+        val user = objectMapper.readValue(value, UserDto::class.java)
+        TODO("Do something")
+    }
+
+        fun syncUsers(value: String) {
+        val users = objectMapper.readValue(value, jacksonTypeRef<List<UserDto>>())
+        TODO("Do something")
+    }
+
+    }
+
+        ```
+
+    </TabItem>
+</Tabs>

@@ -18,23 +18,20 @@ module.exports = {
   organizationName: 'nicos-dev', // Usually your GitHub org/user name.
   projectName: 'nicos-dev.github.io', // Usually your repo name.
   themeConfig: {
+    prism: {
+      additionalLanguages: ['kotlin']
+    },
     navbar: {
       title: 'Nicos-Dev',
       logo: {
-        alt: 'Fellow-Flow Logo',
+        alt: 'Nicos-Dev Logo',
         src: 'img/nicos-dev_logo.png',
       },
       items: [
         {
           to: 'docs/',
           activeBasePath: 'docs',
-          label: 'About',
-          position: 'left',
-        },
-        {
-          to: 'docs/',
-          activeBasePath: 'docs',
-          label: 'Projects',
+          label: 'Documentation',
           position: 'left',
         },
         // Please keep GitHub link to the right for consistency.
@@ -49,46 +46,12 @@ module.exports = {
       style: 'dark',
       links: [
         {
-          title: 'Learn',
-          items: [
-            {
-              label: 'Style Guide',
-              to: 'docs/',
-            },
-            {
-              label: 'Second Doc',
-              to: 'docs/doc2',
-            },
-          ],
-        },
-        {
-          title: 'Community',
-          items: [
-            {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            },
-            {
-              label: 'Twitter',
-              href: 'https://twitter.com/docusaurus',
-            },
-            {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
-            },
-          ],
-        },
-        {
           title: 'More',
           items: [
             {
-              label: 'Blog',
-              to: 'blog',
-            },
-            {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
-            },
+              href: 'https://github.com/nicos-dev/',
+            }
           ],
         },
         {
@@ -122,14 +85,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
-          editUrl:
-            'https://github.com/facebook/docusaurus/edit/master/website/',
-        },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          editUrl:
-            'https://github.com/facebook/docusaurus/edit/master/website/blog/',
+          editUrl: 'https://github.com/nicos-dev/nicos-dev.github.io',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
