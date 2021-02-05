@@ -9,18 +9,19 @@
 
 module.exports = {
   someSidebar: {
-    "Projects": [
-      {
-        "Spring Keycloak Starter": [
-            'projects/keycloak-starter/intro'
-        ]
-      }
+    Projects: [
+        'welcome',
+        {
+          'Spring Keycloak Starter': [
+              'projects/keycloak-starter/intro'
+          ]
+        }
     ],
-    "Know-How": [
+    'Know-How': [
       {
-        "Spring Boot": [
+        'Spring Boot': [
           {
-            "AMQP": [
+            'AMQP': [
                 'know-how/spring-boot/amqp/rabbit-mq'
             ]
           }

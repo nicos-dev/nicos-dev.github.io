@@ -215,7 +215,7 @@ class RabbitMqConfig {
 
 ## Concept
 
-You have to connect 2 services with each other via Exchange **usu.user-exchange**. There'll be 2 Queues **usu.user-service** and **usu.cache-service**
+You have to connect 2 services with each other via Exchange **nicos-dev.user-exchange**. There'll be 2 Queues **nicos-dev.user-service** and **nicos-dev.cache-service**
 The use-case is that you must synchronize data (users) from **User Service** to **Cache Service**
 
 <br/>
@@ -297,7 +297,7 @@ class UserDto : Serializable {
 
 <br/>
 
-#### Event - usu.user.sync-request
+#### Event - nicos-dev.user.sync-request
 
 <Tabs
 defaultValue="flow"
@@ -307,7 +307,7 @@ values={[
 ]}>
 <TabItem value="flow">
 
-<Highlight color="#4287f5">Cache Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.sync-request</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+<Highlight color="#4287f5">Cache Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">nicos-dev.user.sync-request</Highlight> &#10132; <Highlight color="#f54260">nicos-dev.user-exchange</Highlight>
 
 </TabItem>
 <TabItem value="payload">
@@ -319,7 +319,7 @@ values={[
 
 <br/>
 
-#### Event - usu.user.sync-response
+#### Event - nicos-dev.user.sync-response
 
 <Tabs
 defaultValue="flow"
@@ -329,7 +329,7 @@ values={[
 ]}>
 <TabItem value="flow">
 
-<Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.sync-response</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+<Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">nicos-dev.user.sync-response</Highlight> &#10132; <Highlight color="#f54260">nicos-dev.user-exchange</Highlight>
 
 </TabItem>
 <TabItem value="payload">
@@ -352,7 +352,7 @@ Message contains a list of **all users**.
 
 <br/>
 
-#### Event - usu.user.created
+#### Event - nicos-dev.user.created
 
 <Tabs
 defaultValue="flow"
@@ -362,7 +362,7 @@ values={[
 ]}>
 <TabItem value="flow">
 
-<Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.created</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+<Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">nicos-dev.user.created</Highlight> &#10132; <Highlight color="#f54260">nicos-dev.user-exchange</Highlight>
 
 </TabItem>
 <TabItem value="payload">
@@ -383,7 +383,7 @@ Message contains a the created user.
 
 <br/>
 
-#### Event - usu.user.deleted
+#### Event - nicos-dev.user.deleted
 
 <Tabs
 defaultValue="flow"
@@ -393,7 +393,7 @@ values={[
 ]}>
 <TabItem value="flow">
 
-<Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.deleted</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+<Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">nicos-dev.user.deleted</Highlight> &#10132; <Highlight color="#f54260">nicos-dev.user-exchange</Highlight>
 
 </TabItem>
 <TabItem value="payload">
@@ -411,7 +411,7 @@ Message contains a the ID of the deleted user.
 
 <br/>
 
-#### Event - usu.data.updated
+#### Event - nicos-dev.data.updated
 
 <Tabs
 defaultValue="flow"
@@ -421,7 +421,7 @@ values={[
 ]}>
 <TabItem value="flow">
 
-<Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">usu.user.updated</Highlight> &#10132; <Highlight color="#f54260">usu.user-exchange</Highlight>
+<Highlight color="#4287f5">User Service</Highlight> &#10132; Message with <Highlight color="#11d1ce">nicos-dev.user.updated</Highlight> &#10132; <Highlight color="#f54260">nicos-dev.user-exchange</Highlight>
 
 </TabItem>
 <TabItem value="payload">
@@ -459,7 +459,7 @@ values={[
 <TabItem value="cache-service">
 
 ```kotlin
-import com.usu.usermanagement.config.amqp.RabbitMqConfig
+import com.nicos-dev.usermanagement.config.amqp.RabbitMqConfig
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.core.MessageProperties
@@ -478,8 +478,8 @@ class UserRabbitMqSenderServiceImp: UserRabbitMqSenderService {
 
     override fun requestUsers() {
         rabbitMqTemplate.send(
-            "usu.user-exchange", // Exchange
-            "usu.user.sync-request", // Routing Key
+            "nicos-dev.user-exchange", // Exchange
+            "nicos-dev.user.sync-request", // Routing Key
             Message("".toByteArray(), MessageProperties()) // Empty message
         )
     }
@@ -494,7 +494,7 @@ class UserRabbitMqSenderServiceImp: UserRabbitMqSenderService {
 
 ### Receiver
 
-To receive any messages you have to declare bindings. Because Messages are send to <Highlight color="#f54260">usu.user-exchange</Highlight>
+To receive any messages you have to declare bindings. Because Messages are send to <Highlight color="#f54260">nicos-dev.user-exchange</Highlight>
 you must define which <Highlight color="#11d1ce">Routing-Keys</Highlight> should be forwarded to your <Highlight color="#f5c842">Queue</Highlight> in order to receive any messages.
 
 <Tabs
@@ -541,23 +541,23 @@ class UserRabbitMqReceiver {
     @RabbitListener(
         bindings = [
             QueueBinding(
-                value = Queue(value = "usu.cache-service", durable = "true"),
-                exchange = Exchange(value = "usu.user-exchange", type = ExchangeTypes.TOPIC),
+                value = Queue(value = "nicos-dev.cache-service", durable = "true"),
+                exchange = Exchange(value = "nicos-dev.user-exchange", type = ExchangeTypes.TOPIC),
                 key = [
-                    "usu.user.sync-response",
-                    "usu.user.created",
-                    "usu.user.updated",
-                    "usu.user.deleted"
+                    "nicos-dev.user.sync-response",
+                    "nicos-dev.user.created",
+                    "nicos-dev.user.updated",
+                    "nicos-dev.user.deleted"
                 ]
             )
         ]
     )
     fun messageArrived(@Payload value: String, @Header(AmqpHeaders.RECEIVED_ROUTING_KEY) key: String) {
         when (key) {
-            "usu.user.sync-response" -> syncUsers(value)
-            "usu.user.created" -> userCreated(value)
-            "usu.user.updated" -> userUpdated(value)
-            "usu.user.deleted" -> userDeleted(value)
+            "nicos-dev.user.sync-response" -> syncUsers(value)
+            "nicos-dev.user.created" -> userCreated(value)
+            "nicos-dev.user.updated" -> userUpdated(value)
+            "nicos-dev.user.deleted" -> userDeleted(value)
         }
     }
 

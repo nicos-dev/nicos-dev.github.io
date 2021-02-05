@@ -29,14 +29,14 @@ module.exports = {
       },
       items: [
         {
-          to: 'docs/',
+          to: '/docs/welcome',
           activeBasePath: 'docs',
           label: 'Documentation',
           position: 'left',
         },
         // Please keep GitHub link to the right for consistency.
         {
-          href: 'https://github.com/nicos-dev',
+          href: 'https://github.com/nicos-dev/tree/master/',
           label: 'GitHub',
           position: 'right',
         },
@@ -50,7 +50,7 @@ module.exports = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/nicos-dev/',
+              href: 'https://github.com/nicos-dev',
             }
           ],
         },
@@ -85,7 +85,14 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
-          editUrl: 'https://github.com/nicos-dev/nicos-dev.github.io',
+          editUrl:
+              'https://github.com/nicos-dev/nicos-dev.github.io/tree/master/',
+        },
+        blog: {
+          showReadingTime: true,
+          // Please change this to your repo.
+          editUrl:
+              'https://github.com/facebook/docusaurus/edit/master/website/blog/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
