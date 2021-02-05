@@ -13,7 +13,8 @@ module.exports = {
         'welcome',
         {
           'Spring Keycloak Starter': [
-              'projects/keycloak-starter/intro'
+              'projects/keycloak-starter/intro',
+              'projects/keycloak-starter/faq'
           ]
         }
     ],

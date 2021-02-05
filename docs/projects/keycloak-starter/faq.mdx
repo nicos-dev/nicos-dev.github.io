@@ -1,0 +1,40 @@
+---
+id: faq
+title: FAQ's
+---
+
+<br/>
+
+## Terms
+
+<br/>
+
+### Issuers
+
+An issuer is the keycloak-instance where the Token was requested e.g. http://*host:port*/auth/realms/*realm*
+
+This information is saved in the **iss** claim in bearer-token
+```json
+{
+  "iss": "http://docker-machine:3000/auth/realms/<realm>"
+}
+```
+
+
+:::info Information
+If you're requesting a token at http://keycloak.nicos-dev.com/auth and checking the token in internal docker-network via
+http://keycloak:3000/auth/realms/*realm*/protocol/openid-connect/certs you must add both hosts to the issuers property:
+
+```yaml
+# application.yml
+
+keycloak-starter:
+  oauth:
+    issuers:
+      - http://keycloak.nicos-dev.com/auth/realms/<realm>
+      - http://keycloak:3000/auth/realms/<realm>
+```
+:::
+
+
+###
